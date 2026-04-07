@@ -7,6 +7,7 @@ import Menu from "../components/menu/Menu";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { motion } from "framer-motion";
 import FeedbackModal from "../components/menu/FeedbackModal";
+import FeaturedModal from "../components/menu/FeaturedModal";
 
 export default function MenuPage() {
   const { t } = useTranslation();
@@ -14,7 +15,8 @@ export default function MenuPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [complaintsWhatsapp, setComplaintsWhatsapp] = useState("");
-
+  const [hasFeaturedItems, setHasFeaturedItems] = useState(false);
+  const [showFeatured, setShowFeatured] = useState(false);
   useEffect(() => {
     const complaintsRef = ref(db, "settings/complaintsWhatsapp");
     const unsub = onValue(complaintsRef, (snapshot) => {
@@ -78,11 +80,9 @@ export default function MenuPage() {
               </div>
 
               <div className="space-y-3">
-                <h1 className="text-3xl md:text-6xl font-black text-white drop-shadow-2xl tracking-tight">
-                  {t("menu.title")}
-                </h1>
 
-                <div className="inline-block px-5 py-1.5 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 shadow-lg">
+
+                <div className="inline-block px-5 py-2 rounded-full bg-primary/50 backdrop-blur-md border-2 border-primary/80 shadow-lg">
                   <p className="text-white text-xs md:text-sm font-bold tracking-widest uppercase">
                     {t("menu.subtitle")}
                   </p>
@@ -94,12 +94,57 @@ export default function MenuPage() {
 
         {/* Menu Component (Categories Grid) */}
         <div className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 mt-4">
+
+          {hasFeaturedItems && (
+            <div className="top-10 z-40 mb-8 flex justify-center w-full">
+              <button
+                onClick={() => setShowFeatured(true)}
+                className="group relative overflow-hidden outline-none font-bold text-sm md:text-base tracking-wide rounded-[20px] py-3.5 px-9 flex items-center justify-center gap-3 transition-all duration-300 ease-out z-10
+  hover:scale-[1.04]"
+                style={{
+                  background: 'linear-gradient(135deg, #1D3E99, #3b82f6)',
+                  boxShadow: '0 8px 25px rgba(29, 62, 153, 0.35)',
+                }}
+              >
+                {/* Glow Layer */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 bg-white/10"></div>
+
+                {/* Shine Effect */}
+                <div className="absolute -left-1/2 top-0 w-[200%] h-full bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-[shine_1.5s_linear]"></div>
+
+                {/* Icon */}
+                <span
+                  className="text-xl"
+                  style={{
+                    background: 'linear-gradient(135deg, #FFD700, #FFB800)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 0 8px rgba(255, 200, 0, 0.7))',
+                  }}
+                >
+                  ✨
+                </span>
+
+                {/* Text */}
+                <span className="text-white">
+                  الأصناف المميزة
+                </span>
+              </button>
+            </div>
+          )}
+
           <Menu
             onLoadingChange={handleLoadingChange}
+            onHasFeaturedItems={setHasFeaturedItems}
           />
         </div>
 
       </main>
+
+      <FeaturedModal
+        show={showFeatured}
+        onClose={() => setShowFeatured(false)}
+      />
 
       {complaintsWhatsapp !== "" && (
         <FeedbackModal

@@ -134,11 +134,8 @@
     },
     "menu": {
         "title": "قائمتنا",
-        "subtitle": "مطعمكم المفضل",
-        "categories": "الأقسام",
-        "special_offers": "عروض خاصة",
-        "special_offers_desc": "اكتشف أطباقنا المميزة لهذا اليوم!",
-        "no_results": "لم يتم العثور على نتائج تطابق بحثك"
+        "subtitle": "لمتكم عنا غير",
+        "categories": "الأقسام"
     },
     "admin": {
         "dashboard": "لوحة التحكم",
@@ -218,8 +215,7 @@
         "upload_failed": "فشل رفع الصورة، حاول مرة أخرى",
         "uploading": "جاري الرفع...",
         "upload_btn": "رفع الصورة",
-        "item_name_ar_placeholder": "مثل: مارجريتا",
-        "item_name_en_placeholder": "مثل: Margherita",
+        "item_name_ar_placeholder": "مثل: تشيكن لمة",
         "item_price_placeholder": "مثل: 50, 40 (افصل بفاصلة لعدة أحجام)",
         "item_added_success_title": "تم إضافة الصنف بنجاح",
         "item_added_success_desc": "تم تحديث القائمة بنجاح",

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 interface Props {
   item: Item;
+  featuredMode?: boolean;
 }
 
 const ItemRow = React.memo(({ item }: Props) => {
@@ -21,9 +22,8 @@ const ItemRow = React.memo(({ item }: Props) => {
       layout
       whileHover={{ scale: 1.015 }}
       whileTap={{ scale: 0.98 }}
-      className={`relative group flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-white backdrop-blur-md rounded-3xl border border-gray-100 transition-all duration-500 ${
-        unavailable ? "opacity-60 grayscale-[0.8]" : "hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 hover:bg-gray-50/50"
-      }`}
+      className={`relative group flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-white backdrop-blur-md rounded-3xl border border-gray-100 transition-all duration-500 ${unavailable ? "opacity-60 grayscale-[0.8]" : "hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 hover:bg-gray-50/50"
+        }`}
     >
       {/* Image Section */}
       <div className="relative shrink-0 overflow-hidden rounded-2xl border border-gray-50 w-full sm:w-24 h-48 sm:h-24 bg-gray-50">
@@ -54,7 +54,7 @@ const ItemRow = React.memo(({ item }: Props) => {
               </h3>
               {item.star && <FiStar className="text-amber-400 fill-amber-400 shrink-0" size={14} />}
             </div>
-            
+
             {/* Ingredients */}
             {itemIngredients && (
               <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2">
@@ -68,7 +68,7 @@ const ItemRow = React.memo(({ item }: Props) => {
               <span className={`text-base sm:text-xl font-black ${unavailable ? "text-gray-400" : "text-primary"}`}>
                 {prices.map((p) => p.trim()).join(" - ")}
               </span>
-              <span className="text-[10px] font-bold text-gray-400 mt-1">₪</span>
+              <span className="text-xl font-bold text-gray-400 mt-1">₪</span>
             </div>
           </div>
         </div>

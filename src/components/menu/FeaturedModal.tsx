@@ -10,10 +10,9 @@ import { type Item } from "./Menu";
 interface Props {
     show: boolean;
     onClose: () => void;
-    orderSystem: boolean;
 }
 
-export default function FeaturedModal({ show, onClose, orderSystem }: Props) {
+export default function FeaturedModal({ show, onClose }: Props) {
     const { t } = useTranslation();
     const [items, setItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState(true);
@@ -102,11 +101,10 @@ export default function FeaturedModal({ show, onClose, orderSystem }: Props) {
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: idx * 0.06 }}
                                         >
-                                            <ItemRow
-                                                item={item}
-                                                featuredMode={true}
-                                                orderSystem={orderSystem}
-                                            />
+                                                <ItemRow
+                                                    item={item}
+                                                    featuredMode={true}
+                                                />
                                         </motion.div>
                                     ))}
                                 </div>

@@ -35,6 +35,7 @@ export default function ItemCard({ item, index }: Props) {
             (e.target as HTMLImageElement).src = "/logo.png";
           }}
         />
+
         {unavailable && (
           <div className="absolute inset-0 bg-white/60 flex items-center justify-center p-2">
             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg">
@@ -48,7 +49,9 @@ export default function ItemCard({ item, index }: Props) {
       <div className="p-4 flex flex-col items-center text-center gap-2">
         <h4 className={`text-sm md:text-base font-black leading-tight truncate w-full ${unavailable ? "text-gray-400" : "text-primary"}`}>
           {itemName}
+
         </h4>
+
 
         {itemIngredients && (
           <p className="text-[10px] md:text-xs text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2 h-7 md:h-8">
@@ -58,12 +61,14 @@ export default function ItemCard({ item, index }: Props) {
 
         {/* Pricing */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-auto">
+
           {prices.map((p, idx) => (
             <div key={idx} className="flex items-center gap-1">
-              <span className={`text-xs md:text-sm font-black ${unavailable ? "text-gray-400" : "text-primary"}`}>
+              <span className={`text-sm md:text-sm font-black ${unavailable ? "text-gray-400" : "text-primary"}`}>
                 {p.trim()}
               </span>
-              <span className="text-[8px] font-bold text-gray-400 mt-0.5">₪</span>
+
+              <span className="text-sm font-bold text-gray-400 mt-0.5">₪</span>
             </div>
           ))}
         </div>

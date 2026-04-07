@@ -50,6 +50,7 @@ export interface Item {
 /* ================= Props ================= */
 interface Props {
   onLoadingChange?: (loading: boolean) => void;
+  onHasFeaturedItems?: (hasFeatured: boolean) => void;
 }
 
 /**
@@ -63,7 +64,7 @@ type LoadingPhase = "loading" | "skeleton" | "ready";
 const SKELETON_DURATION = 1000;
 const MIN_LOADING_DURATION = 2500;
 
-export default function Menu({ onLoadingChange }: Props) {
+export default function Menu({ onLoadingChange, onHasFeaturedItems }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [phase, setPhase] = useState<LoadingPhase>("loading");
   const isMounted = useRef(true);
@@ -89,6 +90,7 @@ export default function Menu({ onLoadingChange }: Props) {
           if (!isMounted.current) return;
 
           setCategories(data.categories);
+          onHasFeaturedItems?.(data.items.some(item => item.star === true && item.visible !== false));
           onLoadingChange?.(false);
           setPhase("skeleton");
 
@@ -103,6 +105,7 @@ export default function Menu({ onLoadingChange }: Props) {
         unsubscribe = MenuService.subscribeToMenuUpdates((freshData) => {
           if (!isMounted.current) return;
           setCategories(freshData.categories);
+          onHasFeaturedItems?.(freshData.items.some(item => item.star === true && item.visible !== false));
         });
 
       } catch (err) {
@@ -143,6 +146,8 @@ export default function Menu({ onLoadingChange }: Props) {
       transition={{ duration: 0.5 }}
       className="max-w-5xl mx-auto pb-20 px-4"
     >
+
+
       <div className="flex flex-col gap-6 sm:gap-10">
         {availableCategories.map((cat, index) => (
           <CategoryCard key={cat.id} category={cat} index={index} />
