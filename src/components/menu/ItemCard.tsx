@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { type Item } from "./Menu";
+import ImageModal from "../common/ImageModal";
 
 interface Props {
   item: Item;
@@ -7,10 +9,13 @@ interface Props {
 }
 
 export default function ItemCard({ item, index }: Props) {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const itemName = item.nameAr || item.name || "";
   const itemIngredients = item.ingredientsAr || item.ingredients || "";
   const prices = String(item.price).split(",");
   const unavailable = item.visible === false;
+
+  const imageSrc = item.image ? `/images/${item.image}` : "/logo.png";
 
   return (
     <motion.div
@@ -28,9 +33,12 @@ export default function ItemCard({ item, index }: Props) {
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
-          src={item.image ? `/images/${item.image}` : "/logo.png"}
+          src={imageSrc}
           alt={itemName}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!unavailable ? "cursor-zoom-in" : ""}`}
+          onClick={() => {
+            if (!unavailable) setIsImageModalOpen(true);
+          }}
           onError={(e) => {
             (e.target as HTMLImageElement).src = "/logo.png";
           }}
@@ -47,14 +55,13 @@ export default function ItemCard({ item, index }: Props) {
 
       {/* Content Section */}
       <div className="p-4 flex flex-col items-center text-center gap-2">
-        <h4 className={`text-sm md:text-base font-black leading-tight truncate w-full ${unavailable ? "text-gray-400" : "text-primary"}`}>
+        <h4 className={`text-sm md:text-base font-black leading-tight line-clamp-2 w-full wrap-break-word ${unavailable ? "text-gray-400" : "text-primary"}`}>
           {itemName}
-
         </h4>
 
 
         {itemIngredients && (
-          <p className="text-[10px] md:text-xs text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2 h-7 md:h-8">
+          <p className="text-[10px] md:text-xs text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2 pb-1 wrap-break-word">
             {itemIngredients}
           </p>
         )}
@@ -73,6 +80,13 @@ export default function ItemCard({ item, index }: Props) {
           ))}
         </div>
       </div>
+
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageSrc={imageSrc}
+        altText={itemName}
+      />
     </motion.div>
   );
 }

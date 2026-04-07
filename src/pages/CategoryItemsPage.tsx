@@ -21,10 +21,16 @@ export default function CategoryItemsPage() {
   const [complaintsWhatsapp, setComplaintsWhatsapp] = useState("");
 
   useEffect(() => {
+    let unsubscribeMenu: (() => void) | null = null;
+
     const loadData = async () => {
       try {
         const { data: menuData } = await MenuService.getMenuWithFallback();
         setData(menuData);
+
+        unsubscribeMenu = MenuService.subscribeToMenuUpdates((freshData) => {
+          setData(freshData);
+        });
       } catch (err) {
         console.error("Failed to load category data:", err);
       } finally {
@@ -35,11 +41,15 @@ export default function CategoryItemsPage() {
 
     // Complaints Whatsapp fetch
     const complaintsRef = ref(db, "settings/complaintsWhatsapp");
-    const unsub = onValue(complaintsRef, (snapshot) => {
+    const unsubComplaints = onValue(complaintsRef, (snapshot) => {
       const value = snapshot.val();
       setComplaintsWhatsapp(value ? String(value).trim() : "");
     });
-    return () => unsub();
+
+    return () => {
+      unsubComplaints();
+      if (unsubscribeMenu) unsubscribeMenu();
+    };
   }, []);
 
   const category = useMemo(() => data?.categories.find((c) => c.id === id), [data, id]);

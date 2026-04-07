@@ -8,6 +8,7 @@ import LoadingScreen from "../components/common/LoadingScreen";
 import { motion } from "framer-motion";
 import FeedbackModal from "../components/menu/FeedbackModal";
 import FeaturedModal from "../components/menu/FeaturedModal";
+import { Flame } from "lucide-react";
 
 export default function MenuPage() {
   const { t } = useTranslation();
@@ -97,31 +98,14 @@ export default function MenuPage() {
 
 
           {hasFeaturedItems && (
-            <div className="absolute top-6 left-6 z-50 flex items-start">              <button
-              onClick={() => setShowFeatured(true)}
-              className="group relative overflow-hidden outline-none font-bold text-sm md:text-base tracking-wide rounded-3xl p-3.5 px-4 flex items-center justify-center gap-3 transition-all duration-300 ease-out z-10
-  hover:scale-[1.04]"
-              style={{
-                background: 'linear-gradient(#135deg, #1D3E99, #3b82f6)',
-                boxShadow: '0 8px 25px rgba(29, 62, 153, 0.35)',
-              }}
-            >
-
-              {/* Icon */}
-              <span
-                className="text-xl"
-                style={{
-                  background: 'linear-gradient(135deg, #FFD700, #FFB800)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 0 8px rgba(255, 200, 0, 0.7))',
-                }}
+            <div className="absolute top-6 left-6 z-60 flex items-start">
+              <button
+                onClick={() => setShowFeatured(true)}
+                className="group relative overflow-hidden outline-none font-bold text-sm md:text-base tracking-wide rounded-2xl px-3.5 py-3.5 flex items-center justify-center gap-2.5 transition-all duration-300 shadow-lg shadow-blue-900/30 bg-linear-to-r from-blue-700 to-blue-500 hover:scale-[1.03] text-white z-10"
               >
-                ✨
-              </span>
-
-
-            </button>
+                {/* Icon */}
+                <Flame className="text-amber-500 shrink-0 drop-shadow-[0_0_6px_rgba(255,140,0,0.6)]" size={24} fill="currentColor" strokeWidth={1.5} />
+              </button>
             </div>
           )}
 

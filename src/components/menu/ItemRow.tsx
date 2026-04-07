@@ -1,8 +1,9 @@
 import { type Item } from "./Menu";
-import React from "react";
+import React, { useState } from "react";
 import { FiStar } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import ImageModal from "../common/ImageModal";
 
 interface Props {
   item: Item;
@@ -10,12 +11,14 @@ interface Props {
 }
 
 const ItemRow = React.memo(({ item }: Props) => {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const { t } = useTranslation();
   const prices = String(item.price).split(",");
   const unavailable = item.visible === false;
 
   const itemName = item.nameAr || "";
   const itemIngredients = item.ingredientsAr || "";
+  const imageSrc = item.image ? `/images/${item.image}` : "/logo.png";
 
   return (
     <motion.div
@@ -28,9 +31,12 @@ const ItemRow = React.memo(({ item }: Props) => {
       {/* Image Section */}
       <div className="relative shrink-0 overflow-hidden rounded-2xl border border-gray-50 w-full sm:w-24 h-48 sm:h-24 bg-gray-50">
         <img
-          src={item.image ? `/images/${item.image}` : "/logo.png"}
+          src={imageSrc}
           alt={itemName}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!unavailable ? "cursor-zoom-in" : ""}`}
+          onClick={() => {
+            if (!unavailable) setIsImageModalOpen(true);
+          }}
           onError={(e) => {
             (e.target as HTMLImageElement).src = "/logo.png";
           }}
@@ -49,7 +55,7 @@ const ItemRow = React.memo(({ item }: Props) => {
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className={`text-base md:text-lg font-black leading-tight truncate ${unavailable ? "text-gray-400" : "text-primary"}`}>
+              <h3 className={`text-base md:text-lg font-black leading-tight line-clamp-2 w-full wrap-break-word ${unavailable ? "text-gray-400" : "text-primary"}`}>
                 {itemName}
               </h3>
               {item.star && <FiStar className="text-amber-400 fill-amber-400 shrink-0" size={14} />}
@@ -57,7 +63,7 @@ const ItemRow = React.memo(({ item }: Props) => {
 
             {/* Ingredients */}
             {itemIngredients && (
-              <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2">
+              <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2 pb-1 wrap-break-word">
                 {itemIngredients}
               </p>
             )}
@@ -73,6 +79,13 @@ const ItemRow = React.memo(({ item }: Props) => {
           </div>
         </div>
       </div>
+
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageSrc={imageSrc}
+        altText={itemName}
+      />
     </motion.div>
   );
 });
