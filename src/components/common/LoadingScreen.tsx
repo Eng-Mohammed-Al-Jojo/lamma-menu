@@ -3,9 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
-    /** When true, screen is visible. When false, triggers fade-out. */
     visible: boolean;
-    /** Called after fade-out animation completes */
     onExited?: () => void;
 }
 
@@ -16,19 +14,16 @@ export default function LoadingScreen({ visible, onExited }: Props) {
     const [targetProgress, setTargetProgress] = useState(0);
     const [msgIndex, setMsgIndex] = useState(0);
 
-    // Smooth Spring Progress Animation
     const progress = useSpring(0, {
         stiffness: 40,
         damping: 20,
         mass: 1.5,
     });
 
-    // Sync spring with our target state
     useEffect(() => {
         progress.set(targetProgress);
     }, [targetProgress, progress]);
 
-    // Crawl logic: slow progress to 90%, snap to 100% when hidden
     useEffect(() => {
         if (!visible) {
             setTargetProgress(100);
@@ -57,18 +52,10 @@ export default function LoadingScreen({ visible, onExited }: Props) {
         return () => clearInterval(interval);
     }, [messages.length]);
 
-    // SVG Circular Progress Constants
     const radius = 120;
     const circumference = 2 * Math.PI * radius;
 
-    // Proper way to transform motion values for stroke styling
-    const strokeDashoffset = useTransform(
-        progress,
-        [0, 100],
-        [circumference, 0]
-    );
-
-    // Dynamic progress percentage for text
+    const strokeDashoffset = useTransform(progress, [0, 100], [circumference, 0]);
     const roundedProgress = useTransform(progress, p => `${Math.round(p)}%`);
 
     return (
@@ -84,64 +71,53 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                         filter: "blur(20px)",
                         transition: { duration: 1, ease: "easeInOut" }
                     }}
-                    className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden bg-black select-none"
+                    className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden bg-white select-none"
                     dir={isRtl ? "rtl" : "ltr"}
                 >
-                    {/* Layer 1: Cinematic Deep Canvas */}
+
+                    {/* Layer 1: Background */}
                     <div className="absolute inset-0 z-0 scale-105">
                         <motion.div
-                            initial={{ scale: 1.2, filter: "brightness(0.3) blur(10px)" }}
-                            animate={{ scale: 1, filter: "brightness(0.6) blur(2px)" }}
+                            initial={{ scale: 1.15, filter: "brightness(0.5) blur(12px)" }}
+                            animate={{ scale: 1, filter: "brightness(0.65) blur(4px)" }}
                             transition={{ duration: 10, ease: "easeOut" }}
                             className="absolute inset-0 bg-cover bg-center pointer-events-none"
                             style={{ backgroundImage: "url('/logo.png')" }}
                         />
-                        <div className="absolute inset-0 bg-linear-to-b from-black/80 via-transparent to-black/80" />
+                        <div className="absolute inset-0 bg-linear-to-b from-white/60 via-white/20 to-white/60" />
                         <div
-                            className="absolute inset-0 opacity-40 mix-blend-overlay"
+                            className="absolute inset-0 opacity-30 mix-blend-overlay"
                             style={{ background: `radial-gradient(circle at center, var(--color-primary) 0%, transparent 70%)` }}
                         />
                     </div>
 
-                    {/* Layer 2: Moving Light Flares (Depth) */}
-                    <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen overflow-hidden opacity-30">
+                    {/* Layer 2: Light Effects */}
+                    <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen overflow-hidden opacity-25">
                         <motion.div
-                            animate={{
-                                x: ['-80%', '180%'],
-                                opacity: [0, 0.4, 0]
-                            }}
+                            animate={{ x: ['-80%', '180%'], opacity: [0, 0.3, 0] }}
                             transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                            className="absolute top-[30%] w-[120vw] h-[40vh] bg-primary/20 blur-[150px] -rotate-12"
+                            className="absolute top-[30%] w-[120vw] h-[40vh] bg-primary/60 blur-[120px] -rotate-12"
                         />
                         <motion.div
-                            animate={{
-                                x: ['180%', '-80%'],
-                                opacity: [0, 0.3, 0]
-                            }}
+                            animate={{ x: ['180%', '-80%'], opacity: [0, 0.25, 0] }}
                             transition={{ duration: 15, repeat: Infinity, ease: "linear", delay: 2 }}
-                            className="absolute bottom-[30%] w-screen h-[30vh] bg-secondary/10 blur-[120px] rotate-6"
+                            className="absolute bottom-[30%] w-screen h-[30vh] bg-primary/20 blur-[100px] rotate-6"
                         />
                     </div>
 
-                    {/* Layer 3: The Grand Centerpiece */}
+                    {/* Center */}
                     <div className="relative z-10 w-[300px] h-[300px] flex items-center justify-center">
 
-                        {/* Animated Progress Ring */}
-                        <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(var(--color-primary),0.3)]" viewBox="0 0 280 280">
+                        <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_12px_rgba(59,130,246,0.25)]" viewBox="0 0 280 280">
                             <defs>
                                 <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stopColor="var(--color-primary)" />
-                                    <stop offset="100%" stopColor="white" stopOpacity="0.8" />
+                                    <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.6" />
                                 </linearGradient>
                             </defs>
 
-                            {/* Background Track */}
-                            <circle
-                                cx="140" cy="140" r={radius}
-                                stroke="rgba(255,255,255,0.05)" strokeWidth="1" fill="none"
-                            />
+                            <circle cx="140" cy="140" r={radius} stroke="rgba(0,0,0,0.05)" strokeWidth="1" fill="none" />
 
-                            {/* Dynamic Spring Progress */}
                             <motion.circle
                                 cx="140" cy="140" r={radius}
                                 stroke="url(#ringGradient)"
@@ -154,7 +130,6 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                                 }}
                             />
 
-                            {/* Spinning Ornaments */}
                             <motion.circle
                                 cx="140" cy="140" r={radius - 8}
                                 stroke="var(--color-primary)" strokeWidth="0.5" strokeDasharray="4 20"
@@ -165,67 +140,55 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                             />
                         </svg>
 
-                        {/* Floating Glass Orb */}
+                        {/* Glass Orb */}
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-                            className="relative group"
                         >
                             <motion.div
-                                animate={{ y: [-6, 6, -6], rotate: [-1, 1, -1] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                                className="relative w-44 h-44 rounded-full bg-black/40 backdrop-blur-3xl border border-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,0.05),0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center p-8 overflow-hidden"
+                                animate={{ y: [-6, 6, -6] }}
+                                transition={{ duration: 5, repeat: Infinity }}
+                                className="relative w-44 h-44 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 shadow-[inset_0_0_40px_rgba(255,255,255,0.08),0_20px_40px_rgba(0,0,0,0.4)] flex items-center justify-center p-8 overflow-hidden"
                             >
-                                {/* Glass Shine */}
                                 <motion.div
                                     animate={{ x: ['-150%', '250%'] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                    transition={{ duration: 3.5, repeat: Infinity }}
                                     className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent skew-x-12"
-                                />
-
-                                {/* Pulse Halo */}
-                                <motion.div
-                                    animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-                                    transition={{ duration: 4, repeat: Infinity }}
-                                    className="absolute inset-0 rounded-full bg-primary"
                                 />
 
                                 <motion.img
                                     src="/logo.png"
-                                    className="w-full h-full object-contain relative z-10 drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)]"
+                                    className="w-full h-full object-contain relative z-10"
                                     alt="Logo"
                                     animate={{ scale: [0.98, 1.02, 0.98] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    transition={{ duration: 4, repeat: Infinity }}
                                 />
                             </motion.div>
                         </motion.div>
                     </div>
 
-                    {/* Layer 4: Typography & Progress */}
-                    <div className="relative z-10 mt-12 flex flex-col items-center">
+                    {/* Text */}
+                    <div className="relative z-10 mt-10 flex flex-col items-center">
                         <AnimatePresence mode="wait">
                             <motion.h2
                                 key={msgIndex}
-                                initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
-                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                exit={{ opacity: 0, y: -15, filter: "blur(8px)" }}
-                                transition={{ duration: 0.8, ease: "easeOut" }}
-                                className="text-xl md:text-2xl font-black text-white px-6 text-center tracking-widest uppercase opacity-90 drop-shadow-lg"
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -15 }}
+                                transition={{ duration: 0.8 }}
+                                className="text-xl md:text-2xl font-black text-primary/90 text-center tracking-widest uppercase"
                             >
                                 {messages[msgIndex]}
                             </motion.h2>
                         </AnimatePresence>
 
-                        <div className="mt-8 flex items-center gap-6">
-                            <div className="h-px w-24 bg-linear-to-r from-transparent via-primary/40 to-primary" />
-                            <motion.span
-                                className="text-xs font-black text-primary tracking-[0.5em] w-12 text-center"
-                                dir="ltr"
-                            >
-                                <motion.span>{roundedProgress}</motion.span>
+                        <div className="mt-6 flex items-center gap-6">
+                            <div className="h-1 w-20 bg-linear-to-r from-transparent via-primary/20 to-primary" />
+                            <motion.span className="text-lg font-black text-primary tracking-widest w-12 text-center">
+                                {roundedProgress}
                             </motion.span>
-                            <div className="h-px w-24 bg-linear-to-l from-transparent via-primary/40 to-primary" />
+                            <div className="h-1 w-20 bg-linear-to-l from-transparent via-primary/20 to-primary" />
                         </div>
                     </div>
                 </motion.div>

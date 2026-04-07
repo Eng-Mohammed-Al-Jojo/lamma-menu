@@ -287,7 +287,10 @@
         "manage_sub": "إدارة الأصناف الفرعية",
         "manage_sub_desc": "إدارة الأصناف الفرعية",
         "add_new": "أضف قسم فرعي جديد",
-        "add_new_desc": "أضف قسم فرعي جديد"
+        "add_new_desc": "أضف قسم فرعي جديد",
+        "select_image_desc": "اختر صورة للمنتج",
+        "close_gallery": "إغلاق المعرض",
+        "gallery_title": "معرض الصور"
     },
     "footer": {
         "developed_by": "تصميم وتطوير"

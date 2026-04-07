@@ -67,22 +67,22 @@ export default function MenuPage() {
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-20 space-y-6 px-4 max-w-4xl mx-auto -mt-6 md:-mt-10">
+          <div className="relative z-20 space-y-6 px-4 max-w-4xl mx-auto mt-6 md:mt-10">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="space-y-6"
+              className="space-y-0"
             >
               {/* Floating Logo Container */}
-              <div className="w-24 h-24 md:w-32 md:h-32 p-4 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 shadow-2xl mx-auto group hover:scale-105 transition-transform duration-500 ring-1 ring-white/10">
+              <div className="w-24 h-24 md:w-32 md:h-32 p-4 bg-white/10 backdrop-blur-xl rounded-[2.5rem] border-2 border-primary/10 shadow-2xl mx-auto group hover:scale-105 transition-transform duration-500 ring-1 ring-primary/10">
                 <img src="/logo.png" className="w-full h-full object-contain drop-shadow-2xl" alt="Logo" />
               </div>
 
               <div className="space-y-3">
 
 
-                <div className="inline-block px-5 py-2 rounded-full bg-primary/50 backdrop-blur-md border-2 border-primary/80 shadow-lg">
+                <div className="inline-block mt-16 px-5 py-2 rounded-full bg-primary/50 backdrop-blur-md border border-primary/10 shadow-lg">
                   <p className="text-white text-xs md:text-sm font-bold tracking-widest uppercase">
                     {t("menu.subtitle")}
                   </p>
@@ -95,41 +95,33 @@ export default function MenuPage() {
         {/* Menu Component (Categories Grid) */}
         <div className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 mt-4">
 
+
           {hasFeaturedItems && (
-            <div className="top-10 z-40 mb-8 flex justify-center w-full">
-              <button
-                onClick={() => setShowFeatured(true)}
-                className="group relative overflow-hidden outline-none font-bold text-sm md:text-base tracking-wide rounded-[20px] py-3.5 px-9 flex items-center justify-center gap-3 transition-all duration-300 ease-out z-10
+            <div className="absolute top-6 left-6 z-50 flex items-start">              <button
+              onClick={() => setShowFeatured(true)}
+              className="group relative overflow-hidden outline-none font-bold text-sm md:text-base tracking-wide rounded-3xl p-3.5 px-4 flex items-center justify-center gap-3 transition-all duration-300 ease-out z-10
   hover:scale-[1.04]"
+              style={{
+                background: 'linear-gradient(#135deg, #1D3E99, #3b82f6)',
+                boxShadow: '0 8px 25px rgba(29, 62, 153, 0.35)',
+              }}
+            >
+
+              {/* Icon */}
+              <span
+                className="text-xl"
                 style={{
-                  background: 'linear-gradient(135deg, #1D3E99, #3b82f6)',
-                  boxShadow: '0 8px 25px rgba(29, 62, 153, 0.35)',
+                  background: 'linear-gradient(135deg, #FFD700, #FFB800)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 0 8px rgba(255, 200, 0, 0.7))',
                 }}
               >
-                {/* Glow Layer */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 bg-white/10"></div>
+                ✨
+              </span>
 
-                {/* Shine Effect */}
-                <div className="absolute -left-1/2 top-0 w-[200%] h-full bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-[shine_1.5s_linear]"></div>
 
-                {/* Icon */}
-                <span
-                  className="text-xl"
-                  style={{
-                    background: 'linear-gradient(135deg, #FFD700, #FFB800)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    filter: 'drop-shadow(0 0 8px rgba(255, 200, 0, 0.7))',
-                  }}
-                >
-                  ✨
-                </span>
-
-                {/* Text */}
-                <span className="text-white">
-                  الأصناف المميزة
-                </span>
-              </button>
+            </button>
             </div>
           )}
 
