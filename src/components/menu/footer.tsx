@@ -66,9 +66,9 @@ export default function Footer({ onOpenFeedback, complaintsWhatsapp }: FooterPro
         {/* Contact info Row */}
         <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-(--text-main)">
           {footer.address && (
-            <div className="flex items-center gap-2">
-              <FaMapMarkerAlt className="text-primary" />
-              <span>{footer.address}</span>
+            <div className="flex items-start gap-2 text-center justify-center">
+              <FaMapMarkerAlt className="text-primary mt-1 shrink-0" />
+              <span className="text-center">{footer.address}</span>
             </div>
           )}
           {footer.phone && (
@@ -83,7 +83,7 @@ export default function Footer({ onOpenFeedback, complaintsWhatsapp }: FooterPro
         <div className="flex gap-4">
           {socialIcons.map(({ Icon, url }, i) => url && (
             <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-(--bg-main) border border-(--border-color) text-(--text-main) hover:border-primary hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md">
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-(--bg-main) border border-(--border-color) text-primary hover:border-primary hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md">
               <Icon size={18} />
             </a>
           ))}
