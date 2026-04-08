@@ -24,7 +24,6 @@ export default function LoadingScreen({ visible, onExited, minimumDuration = 100
     useEffect(() => {
         progress.set(targetProgress);
     }, [targetProgress, progress]);
-
     useEffect(() => {
         if (!visible) return;
 
@@ -32,22 +31,22 @@ export default function LoadingScreen({ visible, onExited, minimumDuration = 100
 
         const interval = setInterval(() => {
             setTargetProgress(prev => {
-                if (prev >= 90) {
+                const dist = 100 - prev;
+                // نزود التقدم بشكل تدريجي مع random قليل عشان طبيعي
+                const next = prev + dist * 0.02 + Math.random() * 0.2;
+                if (next >= 100) {
                     clearInterval(interval);
+                    // التأكد من انتهاء الحد الأدنى للمدة قبل الإغلاق
                     const elapsed = Date.now() - startTime;
                     const remaining = Math.max(minimumDuration - elapsed, 0);
-
                     setTimeout(() => setTargetProgress(100), remaining);
-                    return prev;
                 }
-                const dist = 90 - prev;
-                return prev + dist * 0.08 + Math.random() * 0.4;
+                return Math.min(next, 100);
             });
-        }, 180);
+        }, 100);
 
         return () => clearInterval(interval);
     }, [visible, minimumDuration]);
-
     const messages = useMemo(() => isRtl
         ? ["نسعى لخدمتكم ...", "نستخدم أجود المكونات...", "لمتنا للعيلة تفرح ...", "مرحباً بك"]
         : ["We strive to serve you...", "The finest ingredients...", "Spicing up moments...", "Welcome"], [isRtl]);
