@@ -65,6 +65,8 @@ const MIN_LOADING_DURATION = 2000; // Slightly reduced for better feel
 
 export default function Menu({ onLoadingChange }: Props) {
   const { menuData, isLoading: contextLoading, hasLoaded } = useMenu();
+  // Capture hasLoaded at mount: if true, data was already cached – skip entrance animation
+  const wasAlreadyLoaded = hasLoaded;
   const [phase, setPhase] = useState<LoadingPhase>(hasLoaded ? "ready" : "loading");
   const isMounted = useRef(true);
 
@@ -123,7 +125,7 @@ export default function Menu({ onLoadingChange }: Props) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={wasAlreadyLoaded ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="max-w-5xl mx-auto pb-20 px-4"

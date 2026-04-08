@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Footer from "../components/menu/footer";
 import Menu from "../components/menu/Menu";
@@ -11,11 +11,17 @@ import { useMenu } from "../context/MenuContext";
 
 export default function MenuPage() {
   const { t } = useTranslation();
-  const { complaintsWhatsapp, hasFeaturedItems } = useMenu();
+  const { complaintsWhatsapp, hasFeaturedItems, hasLoaded } = useMenu();
 
-  const [isLoading, setIsLoading] = useState(true);
+  // If data is already cached (returning from items page) skip the loading screen entirely
+  const [isLoading, setIsLoading] = useState(!hasLoaded);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showFeatured, setShowFeatured] = useState(false);
+
+  // Reset scroll to top on every mount (clean slate on back-navigation)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
 
   // Called by Menu when Firebase fetch completes → triggers LoadingScreen fade-out
   const handleLoadingChange = (loading: boolean) => {
@@ -46,7 +52,7 @@ export default function MenuPage() {
             }}
           >
             <motion.img
-              initial={{ scale: 1.1, opacity: 0 }}
+              initial={hasLoaded ? false : { scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1.5 }}
               src="/logo.png"
@@ -60,7 +66,7 @@ export default function MenuPage() {
           {/* Hero Content */}
           <div className="relative z-20 space-y-6 px-4 max-w-4xl mx-auto mt-6 md:mt-10">
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
+              initial={hasLoaded ? false : { y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
               className="space-y-0"
