@@ -1,114 +1,180 @@
-import { motion, AnimatePresence, useSpring } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
-    visible: boolean;          // مرتبط ب hasLoaded
+    visible: boolean;
     onExited?: () => void;
-    minimumDuration?: number;  // أقل مدة ظهور لللودنج بالميلي ثانية
+    duration?: number;
 }
 
-export default function FancyMenuLoading({ visible, onExited, minimumDuration = 1000 }: Props) {
+export default function FancyFixedLoading({
+    visible,
+    onExited,
+    duration = 2000,
+}: Props) {
     const [show, setShow] = useState(visible);
-    const [startTime, setStartTime] = useState<number | null>(null);
-    const progress = useSpring(0, { stiffness: 50, damping: 25 });
+    const progress = useSpring(0, { stiffness: 60, damping: 20 });
+    const startTimeRef = useRef<number | null>(null);
+    const exitCalledRef = useRef(false);
 
+    // ── Scroll lock ──────────────────────────────────────────────
+    useEffect(() => {
+        if (!show) return;
+        const scrollY = window.scrollY;
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = "100%";
+        document.body.style.overflowY = "scroll";
+        return () => {
+            document.body.style.position = "";
+            document.body.style.top = "";
+            document.body.style.width = "";
+            document.body.style.overflowY = "";
+            window.scrollTo(0, scrollY);
+        };
+    }, [show]);
+
+    // ── Helper: complete and exit ────────────────────────────────
+    const triggerExit = useRef<() => void>(() => { });
+    triggerExit.current = () => {
+        if (exitCalledRef.current) return;
+        exitCalledRef.current = true;
+        progress.set(100);
+        setTimeout(() => {
+            setShow(false);
+            onExited?.();
+        }, 250);
+    };
+
+    // ── On mount: start progress fill ───────────────────────────
     useEffect(() => {
         if (!visible) return;
 
         setShow(true);
-        setStartTime(Date.now());
+        exitCalledRef.current = false;
+        progress.set(0);
+        startTimeRef.current = Date.now();
 
+        // Fill to 85% over duration as a visual indicator only
         const interval = setInterval(() => {
-            if (startTime === null) return;
-            const elapsed = Date.now() - startTime;
-            const nextProgress = Math.min((elapsed / minimumDuration) * 100, 100);
-            progress.set(nextProgress);
+            const elapsed = Date.now() - (startTimeRef.current ?? Date.now());
+            const next = Math.min((elapsed / duration) * 85, 85);
+            progress.set(next);
         }, 50);
 
-        return () => clearInterval(interval);
-    }, [visible, minimumDuration, progress, startTime]);
+        // Safety timeout — exits even if visible never flips false
+        const safetyTimer = setTimeout(() => {
+            clearInterval(interval);
+            triggerExit.current();
+        }, duration * 3); // 3× duration as a last resort
 
+        return () => {
+            clearInterval(interval);
+            clearTimeout(safetyTimer);
+        };
+    }, [visible]);
+
+    // ── React to visible=false (data loaded) ─────────────────────
+    // This is the MAIN exit trigger — fires when Menu calls onLoadingChange(false)
     useEffect(() => {
-        if (!visible) {
-            if (!startTime) {
-                setShow(false);
-                if (onExited) onExited();
-                return;
-            }
+        if (visible) return;
+        if (!show) return;
 
-            const elapsed = Date.now() - startTime;
-            const remaining = Math.max(minimumDuration - elapsed, 0);
+        const elapsed = Date.now() - (startTimeRef.current ?? Date.now());
+        const remaining = Math.max(duration - elapsed, 0);
 
-            const timer = setTimeout(() => {
-                setShow(false);
-                progress.set(100);
-                if (onExited) onExited();
-            }, remaining);
+        // Wait out the minimum duration, then exit
+        const timer = setTimeout(() => {
+            triggerExit.current();
+        }, remaining);
 
-            return () => clearTimeout(timer);
-        }
-    }, [visible, startTime, minimumDuration, onExited, progress]);
+        return () => clearTimeout(timer);
+    }, [visible]);
+
+    const barWidth = useTransform(progress, (v) => `${v}%`);
 
     return (
         <AnimatePresence>
             {show && (
                 <motion.div
-                    key="fancy-menu-loader"
+                    key="fancy-fixed-loader"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, scale: 1.05, transition: { duration: 0.8 } }}
-                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-linear-to-br from-white to-gray-100 overflow-hidden"
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white overflow-hidden"
                 >
-                    {/* Background Glow */}
-                    <motion.div
-                        className="absolute inset-0 bg-primary/10 blur-3xl"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ background: "radial-gradient(circle at center, rgba(29,62,153,0.05) 0%, transparent 65%)" }}
                     />
 
-                    {/* Logo & Rings */}
                     <div className="relative w-40 h-40 flex items-center justify-center mb-6">
                         <motion.div
-                            className="absolute w-52 h-52 border-2 border-primary/20 rounded-full"
-                            animate={{ rotate: [0, 360] }}
-                            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                            className="absolute w-52 h-52 border border-primary/15 rounded-full"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
                         />
                         <motion.div
-                            className="absolute w-44 h-44 border-2 border-primary/30 rounded-full"
-                            animate={{ rotate: [360, 0] }}
+                            className="absolute w-44 h-44 border border-primary/25 rounded-full"
+                            animate={{ rotate: -360 }}
                             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                         />
-
-                        <motion.div
-                            className="w-36 h-36 rounded-full bg-white/70 backdrop-blur-lg border border-primary/30 shadow-xl flex items-center justify-center p-4"
-                            animate={{ scale: [0.95, 1.05, 0.95], rotate: [0, 4, -4, 0] }}
-                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                        <svg
+                            className="absolute inset-0 w-40 h-40"
+                            style={{ transform: "rotate(-90deg)" }}
+                            viewBox="0 0 160 160"
                         >
-                            <img src="/logo.png" alt="Logo" className="w-28 h-28 object-contain" />
+                            <circle cx="80" cy="80" r="72"
+                                stroke="rgba(29,62,153,0.07)"
+                                strokeWidth="1.5" fill="none"
+                            />
+                            <motion.circle
+                                cx="80" cy="80" r="72"
+                                stroke="var(--color-primary)"
+                                strokeWidth="2"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeDasharray={`${2 * Math.PI * 72 * 0.22} ${2 * Math.PI * 72 * 0.78}`}
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                style={{ transformOrigin: "80px 80px" }}
+                            />
+                        </svg>
+                        <motion.div
+                            className="w-28 h-28 rounded-full bg-gray-50 border border-primary/10 flex items-center justify-center p-4 z-10"
+                            animate={{ scale: [0.97, 1.03, 0.97] }}
+                            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
                         </motion.div>
                     </div>
 
-                    {/* Loading Dots */}
-                    <motion.div className="flex gap-3 mb-4 mt-16">
+                    <div className="flex gap-2 mt-8">
                         {[0, 1, 2].map((i) => (
                             <motion.span
                                 key={i}
-                                className="w-4 h-4 rounded-full bg-linear-to-br from-blue-400 to-indigo-500"
-                                animate={{ y: [0, -12, 0], scale: [1, 1.3, 1] }}
-                                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+                                className="w-3 h-3 rounded-full bg-primary/40"
+                                animate={{ y: [0, -8, 0], opacity: [0.4, 1, 0.4] }}
+                                transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.18 }}
                             />
                         ))}
-                    </motion.div>
+                    </div>
 
-                    {/* Loading Text */}
                     <motion.span
-                        className="text-primary font-extrabold text-lg text-center tracking-wider"
-                        style={{ textShadow: "0 0 12px rgba(59,130,246,0.4)" }}
-                        animate={{ opacity: [0.5, 1, 0.5], y: [0, -3, 0] }}
-                        transition={{ duration: 1.2, repeat: Infinity }}
+                        className="mt-8 text-primary/70 font-bold text-base tracking-wide"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 1.4, repeat: Infinity }}
                     >
                         جاري التحميل ...
                     </motion.span>
+
+                    <div className="mt-5 w-36 h-[2px] bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                            className="h-full bg-primary rounded-full"
+                            style={{ width: barWidth }}
+                        />
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>
