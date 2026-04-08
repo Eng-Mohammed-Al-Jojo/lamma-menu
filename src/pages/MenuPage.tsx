@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ref, onValue } from "firebase/database";
-import { db } from "../firebase";
 import Footer from "../components/menu/footer";
 import Menu from "../components/menu/Menu";
 import LoadingScreen from "../components/common/LoadingScreen";
@@ -9,23 +7,15 @@ import { motion } from "framer-motion";
 import FeedbackModal from "../components/menu/FeedbackModal";
 import FeaturedModal from "../components/menu/FeaturedModal";
 import { Flame } from "lucide-react";
+import { useMenu } from "../context/MenuContext";
 
 export default function MenuPage() {
   const { t } = useTranslation();
+  const { complaintsWhatsapp, hasFeaturedItems } = useMenu();
 
   const [isLoading, setIsLoading] = useState(true);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [complaintsWhatsapp, setComplaintsWhatsapp] = useState("");
-  const [hasFeaturedItems, setHasFeaturedItems] = useState(false);
   const [showFeatured, setShowFeatured] = useState(false);
-  useEffect(() => {
-    const complaintsRef = ref(db, "settings/complaintsWhatsapp");
-    const unsub = onValue(complaintsRef, (snapshot) => {
-      const value = snapshot.val();
-      setComplaintsWhatsapp(value ? String(value).trim() : "");
-    });
-    return () => unsub();
-  }, []);
 
   // Called by Menu when Firebase fetch completes → triggers LoadingScreen fade-out
   const handleLoadingChange = (loading: boolean) => {
@@ -111,7 +101,6 @@ export default function MenuPage() {
 
           <Menu
             onLoadingChange={handleLoadingChange}
-            onHasFeaturedItems={setHasFeaturedItems}
           />
         </div>
 

@@ -1,62 +1,47 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ref, onValue } from "firebase/database";
-import { db } from "../firebase";
 import { motion } from "framer-motion";
 import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
-import { MenuService, type MenuData } from "../services/menuService";
+import { useMenu } from "../context/MenuContext";
 import CategorySection from "../components/menu/CategorySection";
-import LoadingScreen from "../components/common/LoadingScreen";
 import Footer from "../components/menu/footer";
 import FeedbackModal from "../components/menu/FeedbackModal";
+import { useState, useEffect } from "react";
+import LoadingScreen from "../components/common/LoadingScreen";
 
 export default function CategoryItemsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const [data, setData] = useState<MenuData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const { menuData, hasLoaded, complaintsWhatsapp } = useMenu();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [complaintsWhatsapp, setComplaintsWhatsapp] = useState("");
+  const [isTransitioning, setIsTransitioning] = useState(true);
 
+  // 1. Scroll Reset & Forward Transition
   useEffect(() => {
-    let unsubscribeMenu: (() => void) | null = null;
+    // Always start at top
+    window.scrollTo({ top: 0, behavior: "instant" });
+    
+    // Brief deliberate loading screen when entering items
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 800);
 
-    const loadData = async () => {
-      try {
-        const { data: menuData } = await MenuService.getMenuWithFallback();
-        setData(menuData);
+    return () => clearTimeout(timer);
+  }, [id]);
 
-        unsubscribeMenu = MenuService.subscribeToMenuUpdates((freshData) => {
-          setData(freshData);
-        });
-      } catch (err) {
-        console.error("Failed to load category data:", err);
-      } finally {
-        setTimeout(() => setIsLoading(false), 800);
-      }
-    };
-    loadData();
+  const category = useMemo(() => menuData?.categories.find((c) => c.id === id), [menuData, id]);
+  const items = useMemo(() => menuData?.items.filter((i) => i.categoryId === id && i.visible !== false) || [], [menuData, id]);
+  const subcategories = useMemo(() => menuData?.subcategories.filter((s) => s.categoryId === id) || [], [menuData, id]);
 
-    // Complaints Whatsapp fetch
-    const complaintsRef = ref(db, "settings/complaintsWhatsapp");
-    const unsubComplaints = onValue(complaintsRef, (snapshot) => {
-      const value = snapshot.val();
-      setComplaintsWhatsapp(value ? String(value).trim() : "");
-    });
+  // 2. Global First-Load Loading
+  if (!hasLoaded) return <LoadingScreen visible={true} />;
 
-    return () => {
-      unsubComplaints();
-      if (unsubscribeMenu) unsubscribeMenu();
-    };
-  }, []);
+  // 3. Page Transition Loading (Forward only)
+  if (isTransitioning) return <LoadingScreen visible={true} />;
 
-  const category = useMemo(() => data?.categories.find((c) => c.id === id), [data, id]);
-  const items = useMemo(() => data?.items.filter((i) => i.categoryId === id && i.visible !== false) || [], [data, id]);
-  const subcategories = useMemo(() => data?.subcategories.filter((s) => s.categoryId === id) || [], [data, id]);
-
-  if (isLoading) return <LoadingScreen visible={true} />;
   if (!category) return <div className="text-center p-20 text-xl font-bold">{t('common.not_found')}</div>;
 
   return (
@@ -95,8 +80,8 @@ export default function CategoryItemsPage() {
           complaintsWhatsapp={complaintsWhatsapp}
         />
       )}
-      <Footer 
-        onOpenFeedback={() => setShowFeedbackModal(true)} 
+      <Footer
+        onOpenFeedback={() => setShowFeedbackModal(true)}
         complaintsWhatsapp={complaintsWhatsapp}
       />
     </div>

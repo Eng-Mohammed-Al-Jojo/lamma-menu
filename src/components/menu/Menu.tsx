@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import MenuSkeleton from "./MenuSkeleton";
-import { MenuService } from "../../services/menuService";
+import { useMenu } from "../../context/MenuContext";
 
 import CategoryCard from "./CategoryCard";
 
@@ -50,81 +50,63 @@ export interface Item {
 /* ================= Props ================= */
 interface Props {
   onLoadingChange?: (loading: boolean) => void;
-  onHasFeaturedItems?: (hasFeatured: boolean) => void;
 }
 
 /**
  * Loading phases:
  *   "loading"  → Firebase data is still being fetched
- *   "skeleton" → Data arrived, Skeleton shown for 800ms
+ *   "skeleton" → Data arrived, Skeleton shown for duration
  *   "ready"    → Full menu rendered
  */
 type LoadingPhase = "loading" | "skeleton" | "ready";
 
 const SKELETON_DURATION = 1000;
-const MIN_LOADING_DURATION = 2500;
+const MIN_LOADING_DURATION = 2000; // Slightly reduced for better feel
 
-export default function Menu({ onLoadingChange, onHasFeaturedItems }: Props) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [phase, setPhase] = useState<LoadingPhase>("loading");
+export default function Menu({ onLoadingChange }: Props) {
+  const { menuData, isLoading: contextLoading, hasLoaded } = useMenu();
+  const [phase, setPhase] = useState<LoadingPhase>(hasLoaded ? "ready" : "loading");
   const isMounted = useRef(true);
 
-  /* ================= Data Fetching ================= */
+  /* ================= Phase Management ================= */
   useEffect(() => {
     isMounted.current = true;
-    onLoadingChange?.(true);
 
-    let unsubscribe: (() => void) | null = null;
+    // SCENARIO 1: Data is already loaded (returning to this page)
+    if (hasLoaded && menuData) {
+      setPhase("ready");
+      onLoadingChange?.(false);
+      return;
+    }
 
-    const loadData = async () => {
-      const startTime = Date.now();
+    // SCENARIO 2: First-time load from context
+    if (!contextLoading && menuData) {
+      onLoadingChange?.(true);
+      setPhase("loading");
 
-      try {
-        const { data } = await MenuService.getMenuWithFallback();
+      const sequence = async () => {
+        // Wait for minimum duration for "brand experience" on first load only
+        await new Promise(resolve => setTimeout(resolve, MIN_LOADING_DURATION));
         if (!isMounted.current) return;
+        
+        onLoadingChange?.(false);
+        setPhase("skeleton");
 
-        const elapsed = Date.now() - startTime;
-        const remainingTime = Math.max(MIN_LOADING_DURATION - elapsed, 0);
-
-        setTimeout(() => {
-          if (!isMounted.current) return;
-
-          setCategories(data.categories);
-          onHasFeaturedItems?.(data.items.some(item => item.star === true && item.visible !== false));
-          onLoadingChange?.(false);
-          setPhase("skeleton");
-
-          setTimeout(() => {
-            if (isMounted.current) {
-              setPhase("ready");
-            }
-          }, SKELETON_DURATION);
-
-        }, remainingTime);
-
-        unsubscribe = MenuService.subscribeToMenuUpdates((freshData) => {
-          if (!isMounted.current) return;
-          setCategories(freshData.categories);
-          onHasFeaturedItems?.(freshData.items.some(item => item.star === true && item.visible !== false));
-        });
-
-      } catch (err) {
-        console.error("Menu load failed:", err);
+        await new Promise(resolve => setTimeout(resolve, SKELETON_DURATION));
         if (isMounted.current) {
-          onLoadingChange?.(false);
           setPhase("ready");
         }
-      }
-    };
+      };
 
-    loadData();
+      sequence();
+    }
 
     return () => {
       isMounted.current = false;
-      unsubscribe?.();
     };
-  }, []);
+  }, [contextLoading, menuData, hasLoaded]);
 
+  const categories = useMemo(() => menuData?.categories || [], [menuData]);
   const availableCategories = useMemo(() =>
     categories.filter(cat => cat.available && cat.visible !== false),
     [categories]);
@@ -146,8 +128,6 @@ export default function Menu({ onLoadingChange, onHasFeaturedItems }: Props) {
       transition={{ duration: 0.5 }}
       className="max-w-5xl mx-auto pb-20 px-4"
     >
-
-
       <div className="flex flex-col gap-6 sm:gap-10">
         {availableCategories.map((cat, index) => (
           <CategoryCard key={cat.id} category={cat} index={index} />
