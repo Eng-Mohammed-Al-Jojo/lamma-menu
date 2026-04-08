@@ -9,7 +9,7 @@ import Footer from "../components/menu/footer";
 import FeedbackModal from "../components/menu/FeedbackModal";
 import LoadingScreen from "../components/common/LoadingScreen";
 
-const BACK_TRANSITION_MS = 2000;
+const BACK_TRANSITION_MS = 1000;
 
 export default function CategoryItemsPage() {
   const { id } = useParams<{ id: string }>();

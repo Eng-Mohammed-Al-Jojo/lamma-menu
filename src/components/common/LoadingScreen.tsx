@@ -5,9 +5,10 @@ import { useTranslation } from "react-i18next";
 interface Props {
     visible: boolean;
     onExited?: () => void;
+    minimumDuration?: number; // minimum duration in ms
 }
 
-export default function LoadingScreen({ visible, onExited }: Props) {
+export default function LoadingScreen({ visible, onExited, minimumDuration = 1000 }: Props) {
     const { i18n } = useTranslation();
     const isRtl = i18n.language === "ar";
 
@@ -25,21 +26,27 @@ export default function LoadingScreen({ visible, onExited }: Props) {
     }, [targetProgress, progress]);
 
     useEffect(() => {
-        if (!visible) {
-            setTargetProgress(100);
-            return;
-        }
+        if (!visible) return;
+
+        const startTime = Date.now();
 
         const interval = setInterval(() => {
-            setTargetProgress((prev) => {
-                if (prev >= 90) return prev;
+            setTargetProgress(prev => {
+                if (prev >= 90) {
+                    clearInterval(interval);
+                    const elapsed = Date.now() - startTime;
+                    const remaining = Math.max(minimumDuration - elapsed, 0);
+
+                    setTimeout(() => setTargetProgress(100), remaining);
+                    return prev;
+                }
                 const dist = 90 - prev;
                 return prev + dist * 0.08 + Math.random() * 0.4;
             });
         }, 180);
 
         return () => clearInterval(interval);
-    }, [visible]);
+    }, [visible, minimumDuration]);
 
     const messages = useMemo(() => isRtl
         ? ["نسعى لخدمتكم ...", "نستخدم أجود المكونات...", "لمتنا للعيلة تفرح ...", "مرحباً بك"]
@@ -74,8 +81,7 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                     className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden bg-white select-none"
                     dir={isRtl ? "rtl" : "ltr"}
                 >
-
-                    {/* Layer 1: Background */}
+                    {/* Background Layer */}
                     <div className="absolute inset-0 z-0 scale-105">
                         <motion.div
                             initial={{ scale: 1.15, filter: "brightness(0.5) blur(12px)" }}
@@ -91,7 +97,7 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                         />
                     </div>
 
-                    {/* Layer 2: Light Effects */}
+                    {/* Light Effects */}
                     <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen overflow-hidden opacity-25">
                         <motion.div
                             animate={{ x: ['-80%', '180%'], opacity: [0, 0.3, 0] }}
@@ -105,9 +111,8 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                         />
                     </div>
 
-                    {/* Center */}
+                    {/* Center Circle & Orb */}
                     <div className="relative z-10 w-[300px] h-[300px] flex items-center justify-center">
-
                         <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_12px_rgba(59,130,246,0.25)]" viewBox="0 0 280 280">
                             <defs>
                                 <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -115,9 +120,7 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                                     <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.6" />
                                 </linearGradient>
                             </defs>
-
                             <circle cx="140" cy="140" r={radius} stroke="rgba(0,0,0,0.05)" strokeWidth="1" fill="none" />
-
                             <motion.circle
                                 cx="140" cy="140" r={radius}
                                 stroke="url(#ringGradient)"
@@ -129,7 +132,6 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                                     strokeDashoffset
                                 }}
                             />
-
                             <motion.circle
                                 cx="140" cy="140" r={radius - 8}
                                 stroke="var(--color-primary)" strokeWidth="0.5" strokeDasharray="4 20"
@@ -156,7 +158,6 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                                     transition={{ duration: 3.5, repeat: Infinity }}
                                     className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent skew-x-12"
                                 />
-
                                 <motion.img
                                     src="/logo.png"
                                     className="w-full h-full object-contain relative z-10"
@@ -168,7 +169,7 @@ export default function LoadingScreen({ visible, onExited }: Props) {
                         </motion.div>
                     </div>
 
-                    {/* Text */}
+                    {/* Text & Progress */}
                     <div className="relative z-10 mt-10 flex flex-col items-center">
                         <AnimatePresence mode="wait">
                             <motion.h2
