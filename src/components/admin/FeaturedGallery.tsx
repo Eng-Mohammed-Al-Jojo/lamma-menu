@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiX, FiCheck, FiImage } from "react-icons/fi";
+import { FiX, FiCheck, FiImage, FiSearch } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -13,6 +13,17 @@ interface Props {
 
 const FeaturedGallery: React.FC<Props> = ({ visible, onClose, onSelect, galleryImages, selectedImage }) => {
     const { t } = useTranslation();
+
+    // ✅ NEW: state للبحث
+    const [search, setSearch] = useState("");
+
+    // ✅ NEW: فلترة الصور
+    const filteredImages = useMemo(() => {
+        return galleryImages.filter((img) =>
+            img.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [galleryImages, search]);
+
     return (
         <AnimatePresence>
             {visible && (
@@ -49,10 +60,26 @@ const FeaturedGallery: React.FC<Props> = ({ visible, onClose, onSelect, galleryI
                             </button>
                         </div>
 
+                        {/* ✅ NEW: Search Input */}
+                        <div className="px-6 pt-4">
+                            <div className="relative">
+                                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted)" />
+                                <input
+                                    type="text"
+                                    placeholder="ابحث عن اسم الصورة ..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-(--bg-main) border border-(--border-color) text-(--text-main) focus:outline-none focus:border-primary"
+                                />
+                            </div>
+                        </div>
+
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6 scroll-smooth custom-scrollbar">
                             <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                                {galleryImages.map((img) => (
+
+                                {/* ✅ UPDATED: استخدم filteredImages بدل galleryImages */}
+                                {filteredImages.map((img) => (
                                     <button
                                         key={img}
                                         type="button"
@@ -86,6 +113,13 @@ const FeaturedGallery: React.FC<Props> = ({ visible, onClose, onSelect, galleryI
                                         </div>
                                     </button>
                                 ))}
+
+                                {/* ✅ NEW: حالة عدم وجود نتائج */}
+                                {filteredImages.length === 0 && (
+                                    <div className="col-span-full text-center text-(--text-muted) py-10">
+                                        No images found
+                                    </div>
+                                )}
                             </div>
                         </div>
 
