@@ -35,7 +35,7 @@ export default function ItemCard({ item, index }: Props) {
         <img
           src={imageSrc}
           alt={itemName}
-          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!unavailable ? "cursor-zoom-in" : ""}`}
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!unavailable ? "cursor-pointer" : ""}`}
           onClick={() => {
             if (!unavailable) setIsImageModalOpen(true);
           }}
@@ -54,30 +54,47 @@ export default function ItemCard({ item, index }: Props) {
       </div>
 
       {/* Content Section */}
-      <div className="p-4 flex flex-col items-center text-center gap-2">
+      <div className="p-3.5 flex flex-col items-center text-center gap-2.5">
         <h4 className={`text-sm md:text-base font-black leading-tight line-clamp-2 w-full wrap-break-word ${unavailable ? "text-gray-400" : "text-primary"}`}>
           {itemName}
         </h4>
 
-
         {itemIngredients && (
-          <p className="text-[10px] md:text-xs text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2 pb-1 wrap-break-word">
+          <p className="text-[10px] md:text-xs text-gray-500 font-medium leading-relaxed opacity-80 line-clamp-2 w-full wrap-break-word">
             {itemIngredients}
           </p>
         )}
 
-        {/* Pricing */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-auto">
-
-          {prices.map((p, idx) => (
-            <div key={idx} className="flex items-center gap-1">
-              <span className={`text-sm md:text-sm font-black ${unavailable ? "text-gray-400" : "text-primary"}`}>
-                {p.trim()}
-              </span>
-
-              <span className="text-sm font-bold text-gray-400 mt-0.5">₪</span>
+        {/* ── Price Badge(s) ─────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center justify-center gap-1.5 mt-auto w-full">
+          {prices.length === 1 ? (
+            /* Single price — soft badge */
+            <div
+              className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border text-sm font-black transition-colors duration-200 ${
+                unavailable
+                  ? "bg-gray-100 text-gray-400 border-gray-200"
+                  : "bg-primary/8 text-primary border-primary/15 group-hover:bg-primary/12"
+              }`}
+            >
+              <span>{prices[0].trim()}</span>
+              <span className="text-xs font-bold opacity-60">₪</span>
             </div>
-          ))}
+          ) : (
+            /* Multiple prices — compact row */
+            prices.map((p, idx) => (
+              <div
+                key={idx}
+                className={`inline-flex items-center gap-0.5 px-2.5 py-1 rounded-lg border text-[11px] md:text-xs font-bold ${
+                  unavailable
+                    ? "bg-gray-100 text-gray-400 border-gray-200"
+                    : "bg-primary/8 text-primary border-primary/15"
+                }`}
+              >
+                <span>{p.trim()}</span>
+                <span className="opacity-50">₪</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -86,6 +103,10 @@ export default function ItemCard({ item, index }: Props) {
         onClose={() => setIsImageModalOpen(false)}
         imageSrc={imageSrc}
         altText={itemName}
+        itemName={itemName}
+        itemIngredients={itemIngredients}
+        prices={prices}
+        unavailable={unavailable}
       />
     </motion.div>
   );

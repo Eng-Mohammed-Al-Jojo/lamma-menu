@@ -83,7 +83,7 @@ export default function FeaturedModal({ show, onClose }: Props) {
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-6">
+                        <div className="flex-1 overflow-y-auto p-2">
                             {loading ? (
                                 <div className="text-center py-20 text-(--text-muted)">
                                     {t('common.loading')}
@@ -101,10 +101,10 @@ export default function FeaturedModal({ show, onClose }: Props) {
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: idx * 0.06 }}
                                         >
-                                                <ItemRow
-                                                    item={item}
-                                                    featuredMode={true}
-                                                />
+                                            <ItemRow
+                                                item={item}
+                                                featuredMode={true}
+                                            />
                                         </motion.div>
                                     ))}
                                 </div>

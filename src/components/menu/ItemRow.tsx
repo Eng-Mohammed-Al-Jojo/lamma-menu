@@ -33,7 +33,7 @@ const ItemRow = React.memo(({ item }: Props) => {
         <img
           src={imageSrc}
           alt={itemName}
-          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!unavailable ? "cursor-zoom-in" : ""}`}
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!unavailable ? "cursor-pointer" : ""}`}
           onClick={() => {
             if (!unavailable) setIsImageModalOpen(true);
           }}
@@ -69,13 +69,36 @@ const ItemRow = React.memo(({ item }: Props) => {
             )}
           </div>
 
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <div className="flex items-center gap-1.5">
-              <span className={`text-base sm:text-xl font-black ${unavailable ? "text-gray-400" : "text-primary"}`}>
-                {prices.map((p) => p.trim()).join(" - ")}
-              </span>
-              <span className="text-xl font-bold text-gray-400 mt-1">₪</span>
-            </div>
+          {/* ── Price Badge(s) ──────────────────────────────────── */}
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            {prices.length === 1 ? (
+              /* Single price — soft badge */
+              <div
+                className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border font-black text-base sm:text-lg transition-colors duration-200 ${
+                  unavailable
+                    ? "bg-gray-100 text-gray-400 border-gray-200"
+                    : "bg-primary/8 text-primary border-primary/15"
+                }`}
+              >
+                <span>{prices[0].trim()}</span>
+                <span className="text-sm font-bold opacity-60">₪</span>
+              </div>
+            ) : (
+              /* Multiple prices */
+              prices.map((p, idx) => (
+                <div
+                  key={idx}
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg border font-bold text-sm ${
+                    unavailable
+                      ? "bg-gray-100 text-gray-400 border-gray-200"
+                      : "bg-primary/8 text-primary border-primary/15"
+                  }`}
+                >
+                  <span>{p.trim()}</span>
+                  <span className="text-xs opacity-50">₪</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -85,6 +108,10 @@ const ItemRow = React.memo(({ item }: Props) => {
         onClose={() => setIsImageModalOpen(false)}
         imageSrc={imageSrc}
         altText={itemName}
+        itemName={itemName}
+        itemIngredients={itemIngredients}
+        prices={prices}
+        unavailable={unavailable}
       />
     </motion.div>
   );

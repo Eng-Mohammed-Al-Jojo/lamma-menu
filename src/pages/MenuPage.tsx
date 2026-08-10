@@ -44,19 +44,38 @@ export default function MenuPage() {
 
       {/* Featured button — fixed to viewport, not relative to any container */}
       {hasFeaturedItems && (
-        <div className="fixed top-6 left-6 z-40">
+        <motion.div
+          className="fixed top-5 left-5 z-40"
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, type: "spring", damping: 16, stiffness: 280 }}
+        >
+          {/* Pulse ring */}
+          <span
+            className="absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none"
+            style={{ background: "radial-gradient(circle, #2952c4, #1D3E99)" }}
+          />
+
           <button
             onClick={() => setShowFeatured(true)}
-            className="group relative overflow-hidden outline-none font-bold text-sm md:text-base tracking-wide rounded-2xl px-3.5 py-3.5 flex items-center justify-center gap-2.5 transition-all duration-300 shadow-lg shadow-blue-900/30 bg-linear-to-r from-blue-700 to-blue-500 hover:scale-[1.03] text-white"
+            className="relative w-14 h-14 rounded-full outline-none flex items-center justify-center group transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:ring-4 focus-visible:ring-primary/40"
+            style={{
+              background: "linear-gradient(145deg, #2952c4 0%, #1D3E99 60%, #162e7a 100%)",
+              boxShadow: "0 6px 24px -4px rgba(29,62,153,0.6), 0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)",
+            }}
           >
+            {/* Inner glow ring */}
+            <span className="absolute inset-[3px] rounded-full border border-white/10 pointer-events-none" />
+
             <Flame
-              className="text-amber-500 shrink-0 drop-shadow-[0_0_6px_rgba(255,140,0,0.6)]"
+              className="relative text-amber-400 group-hover:text-amber-300 transition-colors duration-200"
+              style={{ filter: "drop-shadow(0 0 7px rgba(251,191,36,0.8))" }}
               size={24}
               fill="currentColor"
-              strokeWidth={1.5}
+              strokeWidth={1}
             />
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Content */}
@@ -106,7 +125,7 @@ export default function MenuPage() {
         </div>
 
         {/* Menu */}
-        <div className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 mt-4">
+        <div className="flex-1 w-full max-w-7xl mx-auto px-1 md:px-6 mt-4">
           <Menu onLoadingChange={handleLoadingChange} />
         </div>
       </main>
